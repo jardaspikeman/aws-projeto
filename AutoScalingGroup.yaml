@@ -1,0 +1,12 @@
+AutoScalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      LaunchConfigurationName: !Ref MyLaunchConfiguration
+      MinSize: 1
+      MaxSize: 5
+      DesiredCapacity: 2
+      TargetGroupARNs:
+        - !Ref TargetGroup
+      AvailabilityZone:
+        - us-east-1
+        - us-east-2
