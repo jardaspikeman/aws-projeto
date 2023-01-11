@@ -3,9 +3,9 @@ Parameters:
     Description: An environment name that is prefixed to resource names
     Type: String
     Default: Jardel
-Resources:
-  VPC:
-    Type: AWS::EC2::VPC
+Resources: #definição de quais recursos serão usados
+  VPC: #VPC serve para especificar que esse bloco será referente a uma VPC
+    Type: AWS::EC2::VPC #aqui se especifica qual serviço da aws será usada.
     Properties:
       CidrBlock: 10.0.0.0/16
       EnableDnsSupport: true
@@ -15,14 +15,14 @@ Resources:
           Value: Projeto VPC
 
   IGW:
-    Type: AWS::EC2::InternetGateway
+    Type: AWS::EC2::InternetGateway #aqui define o internet gateway
     Properties:
       Tags:
         - Key: Name
           Value: Projeto IGW
 
   VPCtoIGWConnection:
-    Type: AWS::EC2::VPCGatewayAttachment
+    Type: AWS::EC2::VPCGatewayAttachment #definindo o attachment do igw e a vpc
     DependsOn:
       - IGW
       - VPC
@@ -30,7 +30,7 @@ Resources:
       InternetGatewayId: !Ref IGW
       VpcId: !Ref VPC
 
-  PublicRouteTable:
+  PublicRouteTable: #Criação da public Route Table
     Type: AWS::EC2::RouteTable
     DependsOn: VPC
     Properties:
@@ -39,17 +39,17 @@ Resources:
         - Key: Name
           Value: Projeto Public Route Table
 
-  PublicRoute:
+  PublicRoute: #Criação da PublicRoute
     Type: AWS::EC2::Route
     DependsOn:
       - PublicRouteTable
       - VPCtoIGWConnection
     Properties:
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: 0.0.0.0/0 #Aqui definimos a rota default
       GatewayId: !Ref IGW
       RouteTableId: !Ref PublicRouteTable
 
-  PublicSubnet1:
+  PublicSubnet1: #definindo a primeira subnet publica
     Type: AWS::EC2::Subnet
     DependsOn: VPC
     Properties:
@@ -60,7 +60,7 @@ Resources:
       Tags:
         - Key: Name
           Value: Projeto Public Subnet1
-  PublicSubnet2:
+  PublicSubnet2: #definindo a segunda subnet publica
     Type: AWS::EC2::Subnet
     DependsOn: VPC
     Properties:
@@ -72,7 +72,7 @@ Resources:
         - Key: Name
           Value: Projeto Public Subnet2       
 
-  PublicRouteTableAssociation:
+  PublicRouteTableAssociation: #O attachment public route e as subnets para que as mesmas consigam sair para a internet
     Type: AWS::EC2::SubnetRouteTableAssociation
     DependsOn:
       - PublicRouteTable
@@ -82,14 +82,14 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1
       SubnetId: !Ref PublicSubnet2
-  LoadBalancer:
+  LoadBalancer: #Criação do LoadBalancer
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
       Scheme: internet-facing
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
-  LoadBalancerListener:
+  LoadBalancerListener: #Criação do aplication load balancer
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
     Properties:
       LoadBalancerArn: !Ref LoadBalancer
@@ -98,7 +98,7 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
-  TargetGroup:
+  TargetGroup: #Criação do target group
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
       HealthCheckIntervalSeconds: 30
@@ -141,7 +141,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-  ALBSecurityGroup:
+  ALBSecurityGroup: #criação do security group do ALB para permitir o tráfego do ALB
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: Enable access
@@ -156,7 +156,7 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
-Outputs:
+Outputs: #Saída após o fim da execução do template
   LoadBalancerDNSName:
     Description: The DNS name of the Load Balancer
     Value: !GetAtt LoadBalancer.DNSName
