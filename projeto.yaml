@@ -126,7 +126,7 @@ Resources:
   MyLaunchConfiguration:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
     Properties:
-      ImageId: ami-0b5eea76982371e91
+      ImageId: ami-063c198d4fe0c2d86
       InstanceType: t2.micro
       SecurityGroups:
         - !Ref EC2SecurityGroup
@@ -149,8 +149,12 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
           CidrIp: 0.0.0.0/0
 Outputs:
   LoadBalancerDNSName:
